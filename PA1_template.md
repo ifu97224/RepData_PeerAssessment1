@@ -12,11 +12,18 @@ This assignment makes use of data from a personal activity monitoring device. Th
 The code below reads in the data and converts the date field to the appropriate date class.  This is required for later sections of the assignment.  Libraries used throughout the code are also declared here.
 
 
-```{r import_data, echo = TRUE}
+
+```r
 # set the working directory
 setwd("/users/Richard/Documents/Coursera Data Science Track/Reproducable Research/RepData_PeerAssessment1")
 getwd()
+```
 
+```
+## [1] "/Users/Richard/Documents/Coursera Data Science Track/Reproducable Research/RepData_PeerAssessment1"
+```
+
+```r
 library(dplyr)
 library(ggplot2)
 
@@ -27,14 +34,42 @@ activity_ds_main <- read.csv(file = "activity.csv",
 # convert the date variable to date class
 activity_ds_main$date <- as.Date(activity_ds_main$date,"%Y-%m-%d")
 class(activity_ds_main$date)
+```
 
+```
+## [1] "Date"
+```
+
+```r
 # remove the missing
 complete <- complete.cases(activity_ds_main)
 activity_ds_no_miss <- activity_ds_main[complete,]
 
 head(activity_ds_no_miss)
-summary(activity_ds_no_miss)
+```
 
+```
+##     steps       date interval
+## 289     0 2012-10-02        0
+## 290     0 2012-10-02        5
+## 291     0 2012-10-02       10
+## 292     0 2012-10-02       15
+## 293     0 2012-10-02       20
+## 294     0 2012-10-02       25
+```
+
+```r
+summary(activity_ds_no_miss)
+```
+
+```
+##      steps            date               interval   
+##  Min.   :  0.0   Min.   :2012-10-02   Min.   :   0  
+##  1st Qu.:  0.0   1st Qu.:2012-10-16   1st Qu.: 589  
+##  Median :  0.0   Median :2012-10-29   Median :1178  
+##  Mean   : 37.4   Mean   :2012-10-30   Mean   :1178  
+##  3rd Qu.: 12.0   3rd Qu.:2012-11-16   3rd Qu.:1766  
+##  Max.   :806.0   Max.   :2012-11-29   Max.   :2355
 ```
 
 ### What is mean total number of steps taken per day?
@@ -45,8 +80,8 @@ This section of the assignment will:
 * Make a histogram of the total number of steps taken each day
 * Calculate and report the mean and median of the total number of steps taken per day
 
-```{r mean_daily_steps, echo = TRUE}
 
+```r
 # calculate the total number of steps taken per day
 tot_steps_per_day <- activity_ds_no_miss %>%
                      group_by(date) %>%
@@ -58,11 +93,25 @@ hist(tot_steps_per_day$total_steps,
      col = "red",
      xlab = "Number of Steps per Day",
      main = "Histogram of Number of Steps per Day")
+```
 
+![plot of chunk mean_daily_steps](figure/mean_daily_steps.png) 
+
+```r
 # Calculate and report the mean and median of the total number of steps taken per day
 mean(tot_steps_per_day$total_steps)
-median(tot_steps_per_day$total_steps)
+```
 
+```
+## [1] 10766
+```
+
+```r
+median(tot_steps_per_day$total_steps)
+```
+
+```
+## [1] 10765
 ```
 
 ### What is the average daily activity pattern?
@@ -74,8 +123,8 @@ This section of the assignment will:
 
 The following code chunk calculates the mean steps per interval across all days and then generates a line chart of the data using ggplot2.
 
-```{r mean_daily_pattern, echo = TRUE}
 
+```r
 # Calculate the mean steps across all days for each time interval
 mean_steps_per_interval <- activity_ds_no_miss %>%
                            group_by(interval) %>%
@@ -95,20 +144,20 @@ g <- ggplot(mean_steps_per_interval,aes(interval,mean_steps)) +
            axis.text.x = element_text(size = 12),
            axis.text.y = element_text(size = 12))
 g
-
 ```
+
+![plot of chunk mean_daily_pattern](figure/mean_daily_pattern.png) 
 
 This code chunk identifies the time interval with (on average) the maxinum number of steps.
 
-```{r max_interval, echo = TRUE}
 
+```r
 # Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 max_steps <- which.max(mean_steps_per_interval$mean_steps)
 max_steps2 <- mean_steps_per_interval[max_steps,1]
-
 ```
 
-The time interval with the maximum steps was `r max_steps2`
+The time interval with the maximum steps was 835
 
 ### Imputing missing values
 
@@ -121,19 +170,18 @@ This section of the assignment will:
 
 The following code chunk calculates the number of rows with a missing value in the data frame.
 
-```{r num_missing, echo = TRUE}
 
+```r
 # Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 num_miss <- nrow(activity_ds_main) - sum(complete.cases(activity_ds_main))
-
 ```
 
-The total number of rows with missing data is `r num_miss`
+The total number of rows with missing data is 2304
 
 The code chunk below removes all missing rows from the data frame, replaces the steps with mean per interval (as calculated above) and then merges the data frames together to create a new data frame with the imputed missing values
 
-```{r impute_missing, echo = TRUE}
 
+```r
 # create a data frame of only the rows with a missing value
 all_missing <- activity_ds_main[!complete,]
 
@@ -147,13 +195,12 @@ colnames(all_missing)[3] <- "steps"
 # Create a new dataset that has the same number of rows as the original dataset but with the missing data filled in
 activity_ds_miss_replace <- rbind(activity_ds_no_miss,all_missing)
 activity_ds_miss_replace <- arrange(activity_ds_miss_replace,date,interval)
-
 ```
 
 The code below calculates the total number of steps taken per day with the imputed missing values and plots a histogram of the data.
 
-```{r hist_imputed, echo = TRUE}
 
+```r
 # calculate the total number of steps taken per day for the dataset with the imputed missings
 tot_steps_per_day_miss_replace <- activity_ds_miss_replace %>%
                                   group_by(date) %>%
@@ -165,25 +212,47 @@ hist(tot_steps_per_day_miss_replace$total_steps,
      col = "red",
      xlab = "Number of Steps per Day",
      main = "Histogram of Number of Steps per Day")
-
 ```
+
+![plot of chunk hist_imputed](figure/hist_imputed.png) 
 
 The final code chunk in this section compares the mean and median of the total steps taken per day for the imputed and original data.
 
-```{r imputed_compare, echo = TRUE}
 
+```r
 # mean for original data
 mean(tot_steps_per_day$total_steps)
+```
 
+```
+## [1] 10766
+```
+
+```r
 # mean for imputed data
 mean(tot_steps_per_day_miss_replace$total_steps)
+```
 
+```
+## [1] 10766
+```
+
+```r
 # median for original data
 median(tot_steps_per_day$total_steps)
+```
 
+```
+## [1] 10765
+```
+
+```r
 # median for imputed data
 median(tot_steps_per_day_miss_replace$total_steps)
+```
 
+```
+## [1] 10766
 ```
 
 The means and medians are very similar for the imputed data
@@ -197,19 +266,24 @@ This section of the assignment will:
 
 The code chunk below creates the "weekday" and "weekend" factor variable.
 
-```{r create_factor, echo = TRUE}
 
+```r
 activity_ds_miss_replace$weekday <- ifelse(weekdays(activity_ds_miss_replace$date) %in% c("Saturday","Sunday"),
                                            "Weekend",
                                            "Weekday")
 table(activity_ds_miss_replace$weekday)
+```
 
+```
+## 
+## Weekday Weekend 
+##   12960    4608
 ```
 
 Finally the code below creates the panel plot.
 
-```{r create_panel, echo = TRUE}
 
+```r
 # calculate the mean steps by interval across weekday and weekends
 weekday_weekend_summ <- activity_ds_miss_replace %>%
                         group_by(weekday,interval) %>%
@@ -230,8 +304,8 @@ g <- ggplot(weekday_weekend_summ,aes(interval,mean_steps)) +
                   axis.text.x = element_text(size = 12),
                   axis.text.y = element_text(size = 12))
 g
-
-
 ```
+
+![plot of chunk create_panel](figure/create_panel.png) 
 
 
